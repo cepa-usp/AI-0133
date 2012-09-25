@@ -1,0 +1,3 @@
+h1. Indução eletromagnética
+
+Nesta Atividade Interativa (AI) o usuário deve determinar a direção do fluxo magnético induzido e da corrente elétrica induzida.
