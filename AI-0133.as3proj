@@ -15,7 +15,7 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="src\lib" />
+    <class path="..\cepa-framework" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -52,6 +52,10 @@
   <libraryPaths>
     <element path="src\lib\as3corelib.swc" />
     <element path="src\lib\Botoes.swc" />
+    <element path="..\cepa-framework\includes\as3corelib.swc" />
+    <element path="..\cepa-framework\includes\menuMoldura.swc" />
+    <element path="..\cepa-framework\includes\ui.swc" />
+    <element path="..\cepa-framework\cepa\eval\ProgEvalStats.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

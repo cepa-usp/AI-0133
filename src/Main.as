@@ -1,8 +1,10 @@
 ﻿package 
 {
-	import BaseAssets.BaseMain;
-	import BaseAssets.events.BaseEvent;
-	import BaseAssets.tutorial.CaixaTexto;
+	import cepa.ai.AI;
+	import cepa.ai.AIConstants;
+	import cepa.ai.AIObserver;
+	import cepa.eval.ProgressiveEvaluator;
+	import cepa.eval.StatsScreen;
 	import cepa.utils.ToolTip;
 	import com.adobe.serialization.json.JSON;
 	import fl.transitions.easing.None;
@@ -23,7 +25,7 @@
 	 * ...
 	 * @author Alexandre
 	 */
-	public class Main extends BaseMain
+	public class Main extends Sprite implements AIObserver
 	{
 		//Camadas:
 		private var boardLayer:Sprite;
@@ -40,9 +42,31 @@
 		private var valendoNota:Boolean = false;
 		private var minTentativas:int = 5;
 		
+		private var layerAtividade:Sprite;
 		
-		override protected function init():void 
+		private var ai:AI;
+		private var statsScreen:StatsScreen;
+		
+		public function Main()
 		{
+			if (stage) init();
+			else addEventListener(Event.ADDED_TO_STAGE, init);
+		}
+		
+		
+		private function init(e:Event = null):void 
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, init);
+			
+			ai = new AI(this);
+			
+			ai.container.messageLabel.visible = false;
+			ai.addObserver(this);
+			ai.evaluator = new ProgressiveEvaluator(ai);
+			
+			statsScreen = new StatsScreen(ProgressiveEvaluator(ai.evaluator), ai);
+			
+			
 			createLayers();
 			configMenuBar();
 			createCoord();
@@ -51,7 +75,6 @@
 			
 			layerAtividade.addChild(btValendo);
 			btValendo.addEventListener(MouseEvent.CLICK, askForValer);
-			feedbackScreen.addEventListener(BaseEvent.OK_SCREEN, fazValer);
 			
 			//var flashVars:Object = LoaderInfo(this.stage.loaderInfo).parameters;
 			//var sec:String = flashVars.mode;
@@ -65,28 +88,27 @@
 				initFreeMode();
 			}
 			
-			if (ExternalInterface.available) {
-				initLMSConnection();
-				if (mementoSerialized != null) {
-					if(mementoSerialized != "" && mementoSerialized != "null") recoverStatus(mementoSerialized);
-				}
-			}
-			
-			if (connected) {
+			/*if (connected) {
 				if (scorm.get("cmi.entry") == "ab-initio") iniciaTutorial();
 			}else {
 				if (score == 0) iniciaTutorial();
-			}
+			}*/
 			
 			//if (ExternalInterface.available) {
 				//var sec:String = root.loaderInfo.parameters["mode"];
 			//}
+			
+			ai.initialize();
 		}
 		
 		private function askForValer(e:MouseEvent):void 
 		{
-			feedbackScreen.okCancelMode = true;
-			feedbackScreen.setText("A partir de agora a atividade estará valendo nota. Você não poderá mais voltar ao modo de exploração.\nDeseja continuar?");
+			ProgressiveEvaluator(ai.evaluator).currentPlayMode = AIConstants.PLAYMODE_EVALUATE;
+			btValendo.visible = false;
+			trace("valendo");
+			//feedbackScreen.okCancelMode = true;
+			//feedbackScreen.addEventListener(BaseEvent.OK_SCREEN, fazValer);
+			//feedbackScreen.setText("A partir de agora a atividade estará valendo nota. Você não poderá mais voltar ao modo de exploração.\nDeseja continuar?");
 		}
 		
 		private function fazValer(e:Event):void 
@@ -118,6 +140,10 @@
 		
 		private function createLayers():void 
 		{
+			layerAtividade = new Sprite();
+			addChild(layerAtividade);
+			setChildIndex(layerAtividade, 0);
+			
 			layerAtividade.addChild(fundo);
 			boardLayer = new Sprite();
 			layerAtividade.addChild(boardLayer);
@@ -193,7 +219,9 @@
 					showAnswer();
 					
 				}else {
-					feedbackScreen.setText("Você precisa selecionar um fluxo induzido e uma corrente induzida para ser avaliado.");
+					//feedbackScreen.okCancelMode = false;
+					//feedbackScreen.setText("Você precisa selecionar um fluxo induzido e uma corrente induzida para ser avaliado.");
+					trace("Você precisa selecionar um fluxo induzido e uma corrente induzida para ser avaliado.");
 				}
 			}
 		}
@@ -201,54 +229,20 @@
 		private var filtroCerto:GlowFilter = new GlowFilter(0x008000, 1, 10, 10)
 		private function showAnswer():void 
 		{
+			var fluxo:Boolean = menuBar.mcFluxo.btnSelected.name == area.currentExercice.answerCampo;
+			var corrente:Boolean = menuBar.mcCorrente.btnSelected.name == area.currentExercice.answerRotation;
+			
+			var aval:Avaliacao = new Avaliacao(corrente, fluxo);
+			
 			newScore = 0;
 			
-			if (menuBar.mcFluxo.btnSelected.name == area.currentExercice.answerCampo) {
-				menuBar.mcFluxo.setCertoErrado(true);
-				newScore += 50;
-			}else {
-				menuBar.mcFluxo.setCertoErrado(false);
-				menuBar.mcFluxo[area.currentExercice.answerCampo].filters = [filtroCerto];
-			}
+			menuBar.mcFluxo.setCertoErrado(fluxo);
+			menuBar.mcCorrente.setCertoErrado(corrente);
 			
-			if(menuBar.mcCorrente.btnSelected.name == area.currentExercice.answerRotation) {
-				menuBar.mcCorrente.setCertoErrado(true);
-				newScore += 50;
-			}else {
-				menuBar.mcCorrente.setCertoErrado(false);
-				menuBar.mcCorrente[area.currentExercice.answerRotation].filters = [filtroCerto];
-			}
+			ai.evaluator.addPlayInstance(aval);
 			
-			if (newScore > score) {
-				score = newScore;
-				completed = true;
-				commit();
-			}
-		}
-		
-		private function saveStatusForRecovery():void 
-		{
-			var status:Object = new Object();
-			
-			status.completed = completed;
-			status.score = score;
-			
-			//Salvar o status da atividade
-			status.valendoNota = valendoNota;
-			
-			mementoSerialized = com.adobe.serialization.json.JSON.encode(status);
-		}
-		
-		private function recoverStatus(memento:String):void
-		{
-			var status:Object = com.adobe.serialization.json.JSON.decode(memento);
-			if (!connected) {
-				completed = status.completed;
-				score = status.score;
-			}
-			
-			//Recuperar o status da atividade
-			valendoNota = status.valendoNota;
+			if (!fluxo) menuBar.mcFluxo[area.currentExercice.answerCampo].filters = [filtroCerto];
+			if(!corrente) menuBar.mcCorrente[area.currentExercice.answerRotation].filters = [filtroCerto];
 		}
 		
 		private function showHideAnswer(e:MouseEvent):void 
@@ -264,7 +258,7 @@
 			}
 		}
 		
-		override public function reset(e:MouseEvent = null):void 
+		public function reset(e:MouseEvent = null):void 
 		{
 			menuBar.btAvaliar.visible = true;
 			menuBar.btNovamente.visible = false;
@@ -278,6 +272,43 @@
 			createArea(avalMode);
 			
 			eval = false;
+		}
+		
+		/* INTERFACE cepa.ai.AIObserver */
+		
+		public function onResetClick():void 
+		{
+			reset();
+		}
+		
+		public function onScormFetch():void 
+		{
+			
+		}
+		
+		public function onScormSave():void 
+		{
+			
+		}
+		
+		public function onStatsClick():void 
+		{
+			statsScreen.openStatScreen();
+		}
+		
+		public function onTutorialClick():void 
+		{
+			trace("tuto");
+		}
+		
+		public function onScormConnected():void 
+		{
+			
+		}
+		
+		public function onScormConnectionError():void 
+		{
+			
 		}
 		
 		private function createBoard():void 
@@ -303,7 +334,7 @@
 		
 		
 		//---------------- Tutorial -----------------------
-		
+		/*
 		private var balao:CaixaTexto;
 		private var pointsTuto:Array;
 		private var tutoBaloonPos:Array;
@@ -371,156 +402,7 @@
 			balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
 			unblockAI();
 		}
-		
-		
-		
-		/*------------------------------------------------------------------------------------------------*/
-		//SCORM:
-		
-		private const PING_INTERVAL:Number = 5 * 60 * 1000; // 5 minutos
-		private var completed:Boolean;
-		private var scorm:SCORM;
-		private var scormExercise:int;
-		private var connected:Boolean;
-		private var score:Number = 0;
-		private var pingTimer:Timer;
-		private var mementoSerialized:String = "";
-		
-		/**
-		 * @private
-		 * Inicia a conexão com o LMS.
-		 */
-		private function initLMSConnection () : void
-		{
-			completed = false;
-			connected = false;
-			scorm = new SCORM();
-			
-			pingTimer = new Timer(PING_INTERVAL);
-			pingTimer.addEventListener(TimerEvent.TIMER, pingLMS);
-			
-			connected = scorm.connect();
-			
-			if (connected) {
-				
-				if (scorm.get("cmi.mode" != "normal")) return;
-				
-				scorm.set("cmi.exit", "suspend");
-				// Verifica se a AI já foi concluída.
-				var status:String = scorm.get("cmi.completion_status");	
-				mementoSerialized = scorm.get("cmi.suspend_data");
-				var stringScore:String = scorm.get("cmi.score.raw");
-			 
-				switch(status)
-				{
-					// Primeiro acesso à AI
-					case "not attempted":
-					case "unknown":
-					default:
-						completed = false;
-						break;
-					
-					// Continuando a AI...
-					case "incomplete":
-						completed = false;
-						break;
-					
-					// A AI já foi completada.
-					case "completed":
-						completed = true;
-						//setMessage("ATENÇÃO: esta Atividade Interativa já foi completada. Você pode refazê-la quantas vezes quiser, mas não valerá nota.");
-						break;
-				}
-				
-				//unmarshalObjects(mementoSerialized);
-				scormExercise = int(scorm.get("cmi.location"));
-				score = Number(stringScore.replace(",", "."));
-				//txNota.text = score.toFixed(1).replace(".", ",");
-				
-				var success:Boolean = scorm.set("cmi.score.min", "0");
-				if (success) success = scorm.set("cmi.score.max", "100");
-				
-				if (success)
-				{
-					scorm.save();
-					pingTimer.start();
-				}
-				else
-				{
-					//trace("Falha ao enviar dados para o LMS.");
-					connected = false;
-				}
-			}
-			else
-			{
-				trace("Esta Atividade Interativa não está conectada a um LMS: seu aproveitamento nela NÃO será salvo.");
-				mementoSerialized = ExternalInterface.call("getLocalStorageString");
-			}
-			
-			//reset();
-		}
-		
-		/**
-		 * @private
-		 * Salva cmi.score.raw, cmi.location e cmi.completion_status no LMS
-		 */ 
-		private function commit()
-		{
-			if (connected)
-			{
-				// Salva no LMS a nota do aluno.
-				var success:Boolean = scorm.set("cmi.score.raw", score.toString());
-
-				// Notifica o LMS que esta atividade foi concluída.
-				success = scorm.set("cmi.completion_status", (completed ? "completed" : "incomplete"));
-
-				// Salva no LMS o exercício que deve ser exibido quando a AI for acessada novamente.
-				success = scorm.set("cmi.location", scormExercise.toString());
-				
-				// Salva no LMS a string que representa a situação atual da AI para ser recuperada posteriormente.
-				//mementoSerialized = marshalObjects();
-				success = scorm.set("cmi.suspend_data", mementoSerialized.toString());
-
-				if (success)
-				{
-					scorm.save();
-				}
-				else
-				{
-					pingTimer.stop();
-					//setMessage("Falha na conexão com o LMS.");
-					connected = false;
-				}
-			}else { //LocalStorage
-				ExternalInterface.call("save2LS", mementoSerialized);
-			}
-		}
-		
-		/**
-		 * @private
-		 * Mantém a conexão com LMS ativa, atualizando a variável cmi.session_time
-		 */
-		private function pingLMS (event:TimerEvent)
-		{
-			//scorm.get("cmi.completion_status");
-			commit();
-		}
-		
-		private function saveStatus(e:Event = null):void
-		{
-			if (ExternalInterface.available) {
-				saveStatusForRecovery();
-				if (connected) {
-					//Scorm
-					if (scorm.get("cmi.mode" != "normal")) return;
-					scorm.set("cmi.suspend_data", mementoSerialized);
-					commit();
-				}else {
-					//LocalStorage
-					ExternalInterface.call("save2LS", mementoSerialized);
-				}
-			}
-		}
+		*/
 		
 	}
 
