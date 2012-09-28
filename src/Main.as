@@ -1,7 +1,10 @@
 ﻿package 
 {
 	import BaseAssets.BaseMain;
+	import BaseAssets.events.BaseEvent;
+	import BaseAssets.tutorial.CaixaTexto;
 	import cepa.utils.ToolTip;
+	import com.adobe.serialization.json.JSON;
 	import fl.transitions.easing.None;
 	import fl.transitions.Tween;
 	import fl.transitions.TweenEvent;
@@ -12,6 +15,7 @@
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
 	import flash.filters.GlowFilter;
+	import flash.geom.Point;
 	import flash.utils.Timer;
 	import graph.Coord;
 	import pipwerks.SCORM;
@@ -33,6 +37,9 @@
 		private var campoAtual:ICampo;
 		private var avalMode:Boolean;
 		
+		private var valendoNota:Boolean = false;
+		private var minTentativas:int = 5;
+		
 		
 		override protected function init():void 
 		{
@@ -41,6 +48,10 @@
 			createCoord();
 			sortCampo();
 			createBoard();
+			
+			layerAtividade.addChild(btValendo);
+			btValendo.addEventListener(MouseEvent.CLICK, askForValer);
+			feedbackScreen.addEventListener(BaseEvent.OK_SCREEN, fazValer);
 			
 			//var flashVars:Object = LoaderInfo(this.stage.loaderInfo).parameters;
 			//var sec:String = flashVars.mode;
@@ -54,16 +65,39 @@
 				initFreeMode();
 			}
 			
-			initLMSConnection();
+			if (ExternalInterface.available) {
+				initLMSConnection();
+				if (mementoSerialized != null) {
+					if(mementoSerialized != "" && mementoSerialized != "null") recoverStatus(mementoSerialized);
+				}
+			}
+			
+			if (connected) {
+				if (scorm.get("cmi.entry") == "ab-initio") iniciaTutorial();
+			}else {
+				if (score == 0) iniciaTutorial();
+			}
 			
 			//if (ExternalInterface.available) {
 				//var sec:String = root.loaderInfo.parameters["mode"];
 			//}
 		}
 		
+		private function askForValer(e:MouseEvent):void 
+		{
+			feedbackScreen.okCancelMode = true;
+			feedbackScreen.setText("A partir de agora a atividade estará valendo nota. Você não poderá mais voltar ao modo de exploração.\nDeseja continuar?");
+		}
+		
+		private function fazValer(e:Event):void 
+		{
+			valendoNota = true;
+			btValendo.visible = false;
+		}
+		
 		private function createCoord():void 
 		{
-			coord = new Coord( -10, 10, 640, -8, 8, 480);
+			coord = new Coord( -10, 10, 700, -8, 8, 500);
 		}
 		
 		private function sortCampo():void 
@@ -192,6 +226,31 @@
 			}
 		}
 		
+		private function saveStatusForRecovery():void 
+		{
+			var status:Object = new Object();
+			
+			status.completed = completed;
+			status.score = score;
+			
+			//Salvar o status da atividade
+			status.valendoNota = valendoNota;
+			
+			mementoSerialized = com.adobe.serialization.json.JSON.encode(status);
+		}
+		
+		private function recoverStatus(memento:String):void
+		{
+			var status:Object = com.adobe.serialization.json.JSON.decode(memento);
+			if (!connected) {
+				completed = status.completed;
+				score = status.score;
+			}
+			
+			//Recuperar o status da atividade
+			valendoNota = status.valendoNota;
+		}
+		
 		private function showHideAnswer(e:MouseEvent):void 
 		{
 			if (menuBar.btVerResposta.verresp.visible) {
@@ -243,6 +302,78 @@
 		
 		
 		
+		//---------------- Tutorial -----------------------
+		
+		private var balao:CaixaTexto;
+		private var pointsTuto:Array;
+		private var tutoBaloonPos:Array;
+		private var tutoPos:int;
+		private var tutoSequence:Array;
+		
+		override public function iniciaTutorial(e:MouseEvent = null):void  
+		{
+			blockAI();
+			
+			tutoPos = 0;
+			if(balao == null){
+				balao = new CaixaTexto();
+				layerTuto.addChild(balao);
+				balao.visible = false;
+				
+				tutoSequence = ["Veja aqui as orientações.",
+								"Selecione o fluxo e a corrente que serão induzidos de acordo com a área.",
+								"Pressione \"Avaliar\" para verificar sua resposta.",
+								"Ao pressionar avaliar você poderá verificar a resposta através do botão \"Visualizar/Ocultar resposta\".",
+								"Ao pressionar \"Valendo nota\" suas respostas serão computadas. Você NÃO pode voltar ao modo de exploração.",
+								"Responda no mínimo " + minTentativas + " exercícios para finalizar a atividade.",
+								"Para iniciar uma nova tentativa pressione o botão \"Reset\"."];
+				
+				pointsTuto = 	[new Point(645, 405),
+								new Point(240 , 500),
+								new Point(324 , 446),
+								new Point(180 , 180),
+								new Point(220 , 220),
+								new Point(240 , 240),
+								new Point(543,456)];
+								
+				tutoBaloonPos = [[CaixaTexto.RIGHT, CaixaTexto.CENTER],
+								[CaixaTexto.BOTTON, CaixaTexto.FIRST],
+								["", ""],
+								["", ""],
+								["", ""],
+								["", ""],
+								[CaixaTexto.BOTTON, CaixaTexto.LAST]];
+			}
+			balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
+			
+			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			balao.addEventListener(BaseEvent.NEXT_BALAO, closeBalao);
+			balao.addEventListener(BaseEvent.CLOSE_BALAO, iniciaAi);
+		}
+		
+		private function closeBalao(e:Event):void 
+		{
+			tutoPos++;
+			if (tutoPos >= tutoSequence.length) {
+				balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
+				balao.visible = false;
+				iniciaAi(null);
+			}else {
+				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
+				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
+			}
+		}
+		
+		private function iniciaAi(e:BaseEvent):void 
+		{
+			balao.removeEventListener(BaseEvent.CLOSE_BALAO, iniciaAi);
+			balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
+			unblockAI();
+		}
+		
+		
+		
 		/*------------------------------------------------------------------------------------------------*/
 		//SCORM:
 		
@@ -271,9 +402,13 @@
 			connected = scorm.connect();
 			
 			if (connected) {
+				
+				if (scorm.get("cmi.mode" != "normal")) return;
+				
+				scorm.set("cmi.exit", "suspend");
 				// Verifica se a AI já foi concluída.
 				var status:String = scorm.get("cmi.completion_status");	
-				//mementoSerialized = String(scorm.get("cmi.suspend_data"));
+				mementoSerialized = scorm.get("cmi.suspend_data");
 				var stringScore:String = scorm.get("cmi.score.raw");
 			 
 				switch(status)
@@ -298,7 +433,7 @@
 				}
 				
 				//unmarshalObjects(mementoSerialized);
-				scormExercise = 1;
+				scormExercise = int(scorm.get("cmi.location"));
 				score = Number(stringScore.replace(",", "."));
 				//txNota.text = score.toFixed(1).replace(".", ",");
 				
@@ -319,6 +454,7 @@
 			else
 			{
 				trace("Esta Atividade Interativa não está conectada a um LMS: seu aproveitamento nela NÃO será salvo.");
+				mementoSerialized = ExternalInterface.call("getLocalStorageString");
 			}
 			
 			//reset();
@@ -343,7 +479,7 @@
 				
 				// Salva no LMS a string que representa a situação atual da AI para ser recuperada posteriormente.
 				//mementoSerialized = marshalObjects();
-				//success = scorm.set("cmi.suspend_data", mementoSerialized.toString());
+				success = scorm.set("cmi.suspend_data", mementoSerialized.toString());
 
 				if (success)
 				{
@@ -355,6 +491,8 @@
 					//setMessage("Falha na conexão com o LMS.");
 					connected = false;
 				}
+			}else { //LocalStorage
+				ExternalInterface.call("save2LS", mementoSerialized);
 			}
 		}
 		
@@ -368,13 +506,22 @@
 			commit();
 		}
 		
-		/*private function saveStatus():void
+		private function saveStatus(e:Event = null):void
 		{
-			if(ExternalInterface.available){
-				//mementoSerialized = marshalObjects();
-				//scorm.set("cmi.suspend_data", mementoSerialized);
+			if (ExternalInterface.available) {
+				saveStatusForRecovery();
+				if (connected) {
+					//Scorm
+					if (scorm.get("cmi.mode" != "normal")) return;
+					scorm.set("cmi.suspend_data", mementoSerialized);
+					commit();
+				}else {
+					//LocalStorage
+					ExternalInterface.call("save2LS", mementoSerialized);
+				}
 			}
-		}*/
+		}
+		
 	}
 
 }

@@ -143,13 +143,13 @@
 			exercices.push( { tipo:"resize", pos:new Point(420, 300), initialWidth:80, finalWidth:450, tweenProp:0, answerCampo:fluxoIn, answerRotation:horario } );
 			exercices.push( { tipo:"resize", pos:new Point(420, 150), initialWidth:250, finalWidth:50, tweenProp:0, answerCampo:fluxoOut, answerRotation:antiHorario } );
 			
-			exercices.push( { tipo:"resize", pos:new Point(320, 150), initialWidth:60, finalWidth:250, tweenProp:0, answerCampo:none, answerRotation:none } );
-			exercices.push( { tipo:"resize", pos:new Point(320, 300), initialWidth:420, finalWidth:50, tweenProp:0, answerCampo:none, answerRotation:none } );
+			exercices.push( { tipo:"resize", pos:new Point(350, 150), initialWidth:60, finalWidth:250, tweenProp:0, answerCampo:none, answerRotation:none } );
+			exercices.push( { tipo:"resize", pos:new Point(350, 300), initialWidth:420, finalWidth:50, tweenProp:0, answerCampo:none, answerRotation:none } );
 			
 			exercices.push( { tipo:"resize", pos:new Point(300, 150), initialWidth:75, finalWidth:350, tweenProp:0, answerCampo:fluxoOut, answerRotation:antiHorario } );
-			exercices.push( { tipo:"resize", pos:new Point(340, 300), initialWidth:300, finalWidth:80, tweenProp:0, answerCampo:fluxoOut, answerRotation:antiHorario } );
+			exercices.push( { tipo:"resize", pos:new Point(370, 300), initialWidth:300, finalWidth:80, tweenProp:0, answerCampo:fluxoOut, answerRotation:antiHorario } );
 			
-			exercices.push( { tipo:"resize", pos:new Point(340, 150), initialWidth:90, finalWidth:420, tweenProp:0, answerCampo:fluxoIn, answerRotation:horario } );
+			exercices.push( { tipo:"resize", pos:new Point(370, 150), initialWidth:90, finalWidth:420, tweenProp:0, answerCampo:fluxoIn, answerRotation:horario } );
 			exercices.push( { tipo:"resize", pos:new Point(300, 300), initialWidth:320, finalWidth:60, tweenProp:0, answerCampo:fluxoIn, answerRotation:horario } );
 		}
 		
