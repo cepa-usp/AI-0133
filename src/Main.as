@@ -73,9 +73,6 @@
 			sortCampo();
 			createBoard();
 			
-			layerAtividade.addChild(btValendo);
-			btValendo.addEventListener(MouseEvent.CLICK, askForValer);
-			
 			//var flashVars:Object = LoaderInfo(this.stage.loaderInfo).parameters;
 			//var sec:String = flashVars.mode;
 			
@@ -104,7 +101,7 @@
 		private function askForValer(e:MouseEvent):void 
 		{
 			ProgressiveEvaluator(ai.evaluator).currentPlayMode = AIConstants.PLAYMODE_EVALUATE;
-			btValendo.visible = false;
+			menuBar.btValendo.visible = false;
 			trace("valendo");
 			//feedbackScreen.okCancelMode = true;
 			//feedbackScreen.addEventListener(BaseEvent.OK_SCREEN, fazValer);
@@ -114,7 +111,7 @@
 		private function fazValer(e:Event):void 
 		{
 			valendoNota = true;
-			btValendo.visible = false;
+			menuBar.btValendo.visible = false;
 		}
 		
 		private function createCoord():void 
@@ -156,7 +153,6 @@
 		{
 			layerAtividade.addChild(menuBar);
 			
-			menuBar.y = 446;
 			menuBar.btAvaliar.gotoAndStop(1);
 			menuBar.btAvaliar.buttonMode = true;
 			menuBar.btAvaliar.addEventListener(MouseEvent.MOUSE_OVER, function(e:MouseEvent):void { menuBar.btAvaliar.gotoAndStop(2) } );
@@ -181,6 +177,7 @@
 			
 			menuBar.btNovamente.addEventListener(MouseEvent.CLICK, reset);
 			menuBar.btAvaliar.addEventListener(MouseEvent.CLICK, aval);
+			menuBar.btValendo.addEventListener(MouseEvent.CLICK, askForValer);
 			
 			addToolTips();
 		}
@@ -191,8 +188,8 @@
 			var ttNovamente:ToolTip = new ToolTip(menuBar.btNovamente, "Nova tentativa", 12, 0.8, 200, 0.6, 0.6);
 			var ttVerResp:ToolTip = new ToolTip(menuBar.btVerResposta, "Mostrar/esconder resposta", 12, 0.8, 250, 0.6, 0.6);
 			
-			var ttFluxo:ToolTip = new ToolTip(menuBar.mcFluxo.fluxoMc, "Fluxo induzido", 12, 0.8, 200, 0.6, 0.6);
-			var ttCorrente:ToolTip = new ToolTip(menuBar.mcCorrente.correnteMc, "Corrente induzida", 12, 0.8, 200, 0.6, 0.6);
+			var ttFluxo:ToolTip = new ToolTip(menuBar.fluxoMc, "Fluxo induzido", 12, 0.8, 200, 0.6, 0.6);
+			var ttCorrente:ToolTip = new ToolTip(menuBar.correnteMc, "Corrente induzida", 12, 0.8, 200, 0.6, 0.6);
 			
 			stage.addChild(ttAvaliar);
 			stage.addChild(ttNovamente);
@@ -207,42 +204,32 @@
 		private function aval(e:MouseEvent):void 
 		{
 			if (!eval) {
-				if(menuBar.mcFluxo.btnSelected != null && menuBar.mcCorrente.btnSelected != null){
-					eval = true;
-					menuBar.btAvaliar.visible = false;
-					menuBar.btNovamente.visible = true;
-					menuBar.btVerResposta.visible = true;
-					
-					menuBar.mcFluxo.lockAll();
-					menuBar.mcCorrente.lockAll();
-					
-					showAnswer();
-					
-				}else {
-					//feedbackScreen.okCancelMode = false;
-					//feedbackScreen.setText("Você precisa selecionar um fluxo induzido e uma corrente induzida para ser avaliado.");
-					trace("Você precisa selecionar um fluxo induzido e uma corrente induzida para ser avaliado.");
-				}
+				eval = true;
+				menuBar.btAvaliar.visible = false;
+				menuBar.btNovamente.visible = true;
+				menuBar.btVerResposta.visible = true;
+				menuBar.lock();
+				
+				showAnswer();
 			}
 		}
 		
 		private var filtroCerto:GlowFilter = new GlowFilter(0x008000, 1, 10, 10)
 		private function showAnswer():void 
 		{
-			var fluxo:Boolean = menuBar.mcFluxo.btnSelected.name == area.currentExercice.answerCampo;
-			var corrente:Boolean = menuBar.mcCorrente.btnSelected.name == area.currentExercice.answerRotation;
+			var fluxo:Boolean = BarraMenuNew(menuBar).comboFluxo.selectedItem.value == area.currentExercice.answerCampo;
+			var corrente:Boolean = BarraMenuNew(menuBar).comboCorrente.selectedItem.value == area.currentExercice.answerRotation;
 			
 			var aval:Avaliacao = new Avaliacao(corrente, fluxo);
 			
 			newScore = 0;
 			
-			menuBar.mcFluxo.setCertoErrado(fluxo);
-			menuBar.mcCorrente.setCertoErrado(corrente);
+			BarraMenuNew(menuBar).setAnswer(corrente, fluxo);
 			
 			ai.evaluator.addPlayInstance(aval);
 			
-			if (!fluxo) menuBar.mcFluxo[area.currentExercice.answerCampo].filters = [filtroCerto];
-			if(!corrente) menuBar.mcCorrente[area.currentExercice.answerRotation].filters = [filtroCerto];
+			//if (!fluxo) menuBar.mcFluxo[area.currentExercice.answerCampo].filters = [filtroCerto];
+			//if(!corrente) menuBar.mcCorrente[area.currentExercice.answerRotation].filters = [filtroCerto];
 		}
 		
 		private function showHideAnswer(e:MouseEvent):void 
@@ -266,8 +253,7 @@
 			menuBar.btVerResposta.verexerc.visible = false;
 			menuBar.btVerResposta.verresp.visible = true;
 			
-			menuBar.mcCorrente.reset();
-			menuBar.mcFluxo.reset();
+			menuBar.reset();
 			
 			createArea(avalMode);
 			

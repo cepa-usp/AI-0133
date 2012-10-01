@@ -116,11 +116,11 @@
 			spr_Area.addEventListener(MouseEvent.MOUSE_DOWN, downHandler, false, 0, true);
 		}
 		
-		private const fluxoIn:String = "btnFluxoIn";
-		private const fluxoOut:String = "btnFluxoOut";
-		private const horario:String = "btnHorario";
-		private const antiHorario:String = "btnAntiHorario";
-		private const none:String = "btnNone";
+		private const fluxoIn:String = "fluxoIn";
+		private const fluxoOut:String = "fluxoOut";
+		private const horario:String = "horario";
+		private const antiHorario:String = "antiHorario";
+		private const none:String = "none";
 		
 		//private var exercices:Vector.<>
 		private function createExercices():void 
