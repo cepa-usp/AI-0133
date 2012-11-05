@@ -23,10 +23,10 @@ package
 		private var _correnteResult:MovieClip;
 		
 		private var _openClose:MovieClip;
-		private var menuOpen:Boolean = false;
+		private var menuOpen:Boolean = true;
 		
 		private var inicialX:Number = 5;
-		private var openRange:Number;
+		private var finalX:Number = 202;
 		
 		public function BarraMenuNew() 
 		{
@@ -35,9 +35,16 @@ package
 			preparaMC();
 			addListeners();
 			
-			openRange = this.width - _openClose.width + 5;
-			
 			reset();
+			
+			if (menuOpen) {
+				this.x = finalX;
+				_openClose.gotoAndStop("CLOSE");
+			}
+			else {
+				this.x = inicialX;
+				_openClose.gotoAndStop("OPEN");
+			}
 		}
 		
 		private function preparaMC():void 
@@ -57,12 +64,12 @@ package
 		{
 			if (menuOpen) {
 				menuOpen = false;
-				_openClose.gotoAndStop(1);
+				_openClose.gotoAndStop("OPEN");
 				Actuate.tween(this, 0.5, { x:inicialX} );
 			}else {
 				menuOpen = true;
-				_openClose.gotoAndStop(2);
-				Actuate.tween(this, 0.5, { x:inicialX + openRange } );
+				_openClose.gotoAndStop("CLOSE");
+				Actuate.tween(this, 0.5, { x:finalX } );
 			}
 		}
 		

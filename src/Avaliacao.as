@@ -37,6 +37,7 @@ package
 			obj.fluxo = fluxo;
 			obj.corrente = corrente;
 			obj.score = score;
+			obj.playMode = _playMode;
 			
 			return obj;
 		}
@@ -46,6 +47,7 @@ package
 			fluxo = obj.fluxo;
 			corrente = obj.corrente;
 			score = obj.score;
+			_playMode = obj.playMode;
 		}
 		
 		public function getScore():Number 

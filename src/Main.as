@@ -1,4 +1,4 @@
-﻿package 
+package 
 {
 	import cepa.ai.AI;
 	import cepa.ai.AIConstants;
@@ -59,7 +59,7 @@
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			
 			ai = new AI(this);
-			
+			ai.container.optionButtons.addAllButtons();
 			ai.container.messageLabel.visible = false;
 			ai.addObserver(this);
 			ai.evaluator = new ProgressiveEvaluator(ai);
@@ -141,6 +141,7 @@
 			addChild(layerAtividade);
 			setChildIndex(layerAtividade, 0);
 			
+			var fundo:Fundo = new Fundo();
 			layerAtividade.addChild(fundo);
 			boardLayer = new Sprite();
 			layerAtividade.addChild(boardLayer);
@@ -149,8 +150,11 @@
 			layerAtividade.addChild(areaLayer);
 		}
 		
+		private var menuBar:BarraMenuNew;
 		private function configMenuBar():void 
 		{
+			menuBar = new BarraMenuNew();
+			menuBar.y = 66;
 			layerAtividade.addChild(menuBar);
 			
 			menuBar.btAvaliar.gotoAndStop(1);
