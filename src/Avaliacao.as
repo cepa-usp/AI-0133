@@ -58,8 +58,8 @@ package
 		public function evaluate():void 
 		{
 			score = 0;
-			if (corrente) score += 50;
-			if (fluxo) score += 50;
+			if (corrente) score += 0.5;
+			if (fluxo) score += 0.5;
 		}
 		
 	}

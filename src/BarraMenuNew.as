@@ -93,18 +93,18 @@ package
 		private function praparaCombo():void 
 		{
 			_comboFluxo = new ComboBox();
-			_comboFluxo.x = -170;
-			_comboFluxo.y = -28;
-			_comboFluxo.width = 120;
+			_comboFluxo.x = -177;
+			_comboFluxo.y = -23;
+			_comboFluxo.width = 125;
 			_comboFluxo.addItem( { label:"Nenhum", value:"none"});
-			_comboFluxo.addItem( { label:"Fluxo entrando", value:"fluxoIn"});
-			_comboFluxo.addItem( { label:"Fluxo saindo", value:"fluxoOut" } );
+			_comboFluxo.addItem( { label:"Entrando na tela", value:"fluxoIn"});
+			_comboFluxo.addItem( { label:"Saindo da tela", value:"fluxoOut" } );
 			addChild(_comboFluxo);
 			
 			_comboCorrente = new ComboBox();
-			_comboCorrente.x = -170;
-			_comboCorrente.y = 28;
-			_comboCorrente.width = 120;
+			_comboCorrente.x = -177;
+			_comboCorrente.y = 33;
+			_comboCorrente.width = 125;
 			_comboCorrente.addItem( { label:"Nenhum", value:"none"});
 			_comboCorrente.addItem( { label:"Sentido horário", value:"horario"});
 			_comboCorrente.addItem( { label:"Sentido antihorário", value:"antiHorario" } );

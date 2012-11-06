@@ -5,6 +5,8 @@ package
 	import cepa.ai.AIObserver;
 	import cepa.eval.ProgressiveEvaluator;
 	import cepa.eval.StatsScreen;
+	import cepa.tutorial.CaixaTextoNova;
+	import cepa.tutorial.Tutorial;
 	import cepa.utils.ToolTip;
 	import com.adobe.serialization.json.JSON;
 	import fl.transitions.easing.None;
@@ -16,6 +18,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
+	import flash.filters.ColorMatrixFilter;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.utils.Timer;
@@ -47,6 +50,16 @@ package
 		private var ai:AI;
 		private var statsScreen:StatsScreen;
 		
+		/*
+		 * Filtro de conversão para tons de cinza.
+		 */
+		protected const GRAYSCALE_FILTER:ColorMatrixFilter = new ColorMatrixFilter([
+			0.2225, 0.7169, 0.0606, 0, 0,
+			0.2225, 0.7169, 0.0606, 0, 0,
+			0.2225, 0.7169, 0.0606, 0, 0,
+			0.0000, 0.0000, 0.0000, 1, 0
+		]);
+		
 		public function Main()
 		{
 			if (stage) init();
@@ -61,10 +74,17 @@ package
 			ai = new AI(this);
 			ai.container.optionButtons.addAllButtons();
 			ai.container.messageLabel.visible = false;
+			ai.container.setAboutScreen(new AboutScreen133());
+			ai.container.setInfoScreen(new InstScreen133());
 			ai.addObserver(this);
 			ai.evaluator = new ProgressiveEvaluator(ai);
+			ProgressiveEvaluator(ai.evaluator).feedback.x = stage.stageWidth / 2;
+			ProgressiveEvaluator(ai.evaluator).feedback.y = stage.stageHeight / 2;
 			
 			statsScreen = new StatsScreen(ProgressiveEvaluator(ai.evaluator), ai);
+			statsScreen.stats.x = stage.stageWidth / 2;
+			statsScreen.stats.y = stage.stageHeight / 2;
+			statsScreen.bindButton(ai.container.optionButtons.btStatistics);
 			
 			
 			createLayers();
@@ -95,23 +115,42 @@ package
 				//var sec:String = root.loaderInfo.parameters["mode"];
 			//}
 			
+			ai.debugMode = true;
 			ai.initialize();
+		}
+		
+		protected function lock(bt:*):void
+		{
+			bt.filters = [GRAYSCALE_FILTER];
+			bt.alpha = 0.5;
+			bt.mouseEnabled = false;
+		}
+		
+		protected function unlock(bt:*):void
+		{
+			bt.filters = [];
+			bt.alpha = 1;
+			bt.mouseEnabled = true;
 		}
 		
 		private function askForValer(e:MouseEvent):void 
 		{
-			ProgressiveEvaluator(ai.evaluator).currentPlayMode = AIConstants.PLAYMODE_EVALUATE;
-			menuBar.btValendo.visible = false;
-			trace("valendo");
+			ProgressiveEvaluator(ai.evaluator).askEvaluation(menuBar.btValendo, fazValer);
+			
+			//ProgressiveEvaluator(ai.evaluator).currentPlayMode = AIConstants.PLAYMODE_EVALUATE;
+			//menuBar.btValendo.visible = false;
+			//trace("valendo");
 			//feedbackScreen.okCancelMode = true;
 			//feedbackScreen.addEventListener(BaseEvent.OK_SCREEN, fazValer);
 			//feedbackScreen.setText("A partir de agora a atividade estará valendo nota. Você não poderá mais voltar ao modo de exploração.\nDeseja continuar?");
 		}
 		
-		private function fazValer(e:Event):void 
+		private function fazValer():void 
 		{
-			valendoNota = true;
-			menuBar.btValendo.visible = false;
+			if(ProgressiveEvaluator(ai.evaluator).currentPlayMode == AIConstants.PLAYMODE_EVALUATE){
+				valendoNota = true;
+				//lock(menuBar.btValendo);
+			}
 		}
 		
 		private function createCoord():void 
@@ -131,7 +170,7 @@ package
 		
 		private function initFreeMode():void 
 		{
-			menuBar.visible = false;
+			lock(menuBar.visible);
 			createArea();
 		}
 		
@@ -174,7 +213,7 @@ package
 			
 			menuBar.btVerResposta.addEventListener(MouseEvent.CLICK, showHideAnswer);
 			
-			menuBar.btNovamente.visible = false;
+			lock(menuBar.btNovamente);
 			menuBar.btVerResposta.visible = false;
 			menuBar.btVerResposta.verexerc.visible = false;
 			menuBar.btVerResposta.verresp.visible = true;
@@ -189,8 +228,9 @@ package
 		private function addToolTips():void
 		{
 			var ttAvaliar:ToolTip = new ToolTip(menuBar.btAvaliar, "Avaliar exercício", 12, 0.8, 200, 0.6, 0.6);
-			var ttNovamente:ToolTip = new ToolTip(menuBar.btNovamente, "Nova tentativa", 12, 0.8, 200, 0.6, 0.6);
+			var ttNovamente:ToolTip = new ToolTip(menuBar.btNovamente, "Novo exercício", 12, 0.8, 200, 0.6, 0.6);
 			var ttVerResp:ToolTip = new ToolTip(menuBar.btVerResposta, "Mostrar/esconder resposta", 12, 0.8, 250, 0.6, 0.6);
+			var ttValendo:ToolTip = new ToolTip(menuBar.btValendo, "Mudar para o modo de avaliação", 12, 0.8, 250, 0.6, 0.6);
 			
 			var ttFluxo:ToolTip = new ToolTip(menuBar.fluxoMc, "Fluxo induzido", 12, 0.8, 200, 0.6, 0.6);
 			var ttCorrente:ToolTip = new ToolTip(menuBar.correnteMc, "Corrente induzida", 12, 0.8, 200, 0.6, 0.6);
@@ -198,6 +238,7 @@ package
 			stage.addChild(ttAvaliar);
 			stage.addChild(ttNovamente);
 			stage.addChild(ttVerResp);
+			stage.addChild(ttValendo);
 			
 			stage.addChild(ttFluxo);
 			stage.addChild(ttCorrente);
@@ -210,7 +251,7 @@ package
 			if (!eval) {
 				eval = true;
 				menuBar.btAvaliar.visible = false;
-				menuBar.btNovamente.visible = true;
+				unlock(menuBar.btNovamente);
 				menuBar.btVerResposta.visible = true;
 				menuBar.lock();
 				
@@ -225,7 +266,7 @@ package
 			var corrente:Boolean = BarraMenuNew(menuBar).comboCorrente.selectedItem.value == area.currentExercice.answerRotation;
 			
 			var aval:Avaliacao = new Avaliacao(corrente, fluxo);
-			
+			aval.evaluate();
 			newScore = 0;
 			
 			BarraMenuNew(menuBar).setAnswer(corrente, fluxo);
@@ -252,7 +293,7 @@ package
 		public function reset(e:MouseEvent = null):void 
 		{
 			menuBar.btAvaliar.visible = true;
-			menuBar.btNovamente.visible = false;
+			lock(menuBar.btNovamente);
 			menuBar.btVerResposta.visible = false;
 			menuBar.btVerResposta.verexerc.visible = false;
 			menuBar.btVerResposta.verresp.visible = true;
@@ -281,14 +322,19 @@ package
 			
 		}
 		
-		public function onStatsClick():void 
-		{
-			statsScreen.openStatScreen();
-		}
-		
+		private var tutorial:Tutorial;
 		public function onTutorialClick():void 
 		{
-			trace("tuto");
+			if (tutorial == null) {
+				tutorial = new Tutorial();
+				tutorial.adicionarBalao("Testando.", new Point(30, 100), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao("Testando 2.", new Point(60, 200), CaixaTextoNova.LEFT, CaixaTextoNova.CENTER);
+				tutorial.adicionarBalao("Testando 3.", new Point(90, 300), CaixaTextoNova.LEFT, CaixaTextoNova.LAST);
+				tutorial.adicionarBalao("Testando 4.", new Point(100, 400), CaixaTextoNova.RIGHT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao("Testando 5.", new Point(120, 500), CaixaTextoNova.RIGHT, CaixaTextoNova.LAST);
+			}
+			
+			tutorial.iniciar(stage, true);
 		}
 		
 		public function onScormConnected():void 
@@ -297,6 +343,11 @@ package
 		}
 		
 		public function onScormConnectionError():void 
+		{
+			
+		}
+		
+		public function onStatsClick():void 
 		{
 			
 		}
