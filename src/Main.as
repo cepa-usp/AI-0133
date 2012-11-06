@@ -115,7 +115,7 @@ package
 				//var sec:String = root.loaderInfo.parameters["mode"];
 			//}
 			
-			ai.debugMode = true;
+			//ai.debugMode = true;
 			ai.initialize();
 		}
 		
@@ -371,79 +371,6 @@ package
 				area.y = 200;
 			}
 		}
-		
-		
-		
-		//---------------- Tutorial -----------------------
-		/*
-		private var balao:CaixaTexto;
-		private var pointsTuto:Array;
-		private var tutoBaloonPos:Array;
-		private var tutoPos:int;
-		private var tutoSequence:Array;
-		
-		override public function iniciaTutorial(e:MouseEvent = null):void  
-		{
-			blockAI();
-			
-			tutoPos = 0;
-			if(balao == null){
-				balao = new CaixaTexto();
-				layerTuto.addChild(balao);
-				balao.visible = false;
-				
-				tutoSequence = ["Veja aqui as orientações.",
-								"Selecione o fluxo e a corrente que serão induzidos de acordo com a área.",
-								"Pressione \"Avaliar\" para verificar sua resposta.",
-								"Ao pressionar avaliar você poderá verificar a resposta através do botão \"Visualizar/Ocultar resposta\".",
-								"Ao pressionar \"Valendo nota\" suas respostas serão computadas. Você NÃO pode voltar ao modo de exploração.",
-								"Responda no mínimo " + minTentativas + " exercícios para finalizar a atividade.",
-								"Para iniciar uma nova tentativa pressione o botão \"Reset\"."];
-				
-				pointsTuto = 	[new Point(645, 405),
-								new Point(240 , 500),
-								new Point(324 , 446),
-								new Point(180 , 180),
-								new Point(220 , 220),
-								new Point(240 , 240),
-								new Point(543,456)];
-								
-				tutoBaloonPos = [[CaixaTexto.RIGHT, CaixaTexto.CENTER],
-								[CaixaTexto.BOTTON, CaixaTexto.FIRST],
-								["", ""],
-								["", ""],
-								["", ""],
-								["", ""],
-								[CaixaTexto.BOTTON, CaixaTexto.LAST]];
-			}
-			balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
-			
-			balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
-			balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
-			balao.addEventListener(BaseEvent.NEXT_BALAO, closeBalao);
-			balao.addEventListener(BaseEvent.CLOSE_BALAO, iniciaAi);
-		}
-		
-		private function closeBalao(e:Event):void 
-		{
-			tutoPos++;
-			if (tutoPos >= tutoSequence.length) {
-				balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
-				balao.visible = false;
-				iniciaAi(null);
-			}else {
-				balao.setText(tutoSequence[tutoPos], tutoBaloonPos[tutoPos][0], tutoBaloonPos[tutoPos][1]);
-				balao.setPosition(pointsTuto[tutoPos].x, pointsTuto[tutoPos].y);
-			}
-		}
-		
-		private function iniciaAi(e:BaseEvent):void 
-		{
-			balao.removeEventListener(BaseEvent.CLOSE_BALAO, iniciaAi);
-			balao.removeEventListener(BaseEvent.NEXT_BALAO, closeBalao);
-			unblockAI();
-		}
-		*/
 		
 	}
 

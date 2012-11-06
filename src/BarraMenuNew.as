@@ -58,6 +58,7 @@ package
 			_correnteMCmenu.addEventListener(MouseEvent.CLICK, clickMC);
 			
 			_openClose.addEventListener(MouseEvent.CLICK, openCloseMenu);
+			_openClose.buttonMode = true;
 		}
 		
 		private function openCloseMenu(e:MouseEvent):void 
