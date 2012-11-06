@@ -49,6 +49,7 @@ package
 		
 		private var ai:AI;
 		private var statsScreen:StatsScreen;
+		private var play:Play;
 		
 		/*
 		 * Filtro de conversão para tons de cinza.
@@ -93,6 +94,13 @@ package
 			sortCampo();
 			createBoard();
 			
+			play = new Play();
+			addChild(play);
+			play.x = 75;
+			play.y = 435;
+			play.visible = false;
+			play.addEventListener(MouseEvent.CLICK, startAnswerAnimation);
+			
 			//var flashVars:Object = LoaderInfo(this.stage.loaderInfo).parameters;
 			//var sec:String = flashVars.mode;
 			
@@ -117,6 +125,12 @@ package
 			
 			//ai.debugMode = true;
 			ai.initialize();
+		}
+		
+		private function startAnswerAnimation(e:MouseEvent):void 
+		{
+			play.visible = false;
+			area.startAnimation();
 		}
 		
 		protected function lock(bt:*):void
@@ -269,7 +283,8 @@ package
 			aval.evaluate();
 			newScore = 0;
 			
-			BarraMenuNew(menuBar).setAnswer(corrente, fluxo);
+			//BarraMenuNew(menuBar).setAnswer(corrente, fluxo);
+			BarraMenuNew(menuBar).setAnswer(area.currentExercice.answerRotation, area.currentExercice.answerCampo);
 			
 			ai.evaluator.addPlayInstance(aval);
 			
@@ -283,10 +298,16 @@ package
 				menuBar.btVerResposta.verresp.visible = false;
 				menuBar.btVerResposta.verexerc.visible = true;
 				area.showVisualAnswer = true;
+				menuBar.showAnswer();
+				area.stopAnimation();
+				play.visible = true;
 			}else {
 				menuBar.btVerResposta.verresp.visible = true;
 				menuBar.btVerResposta.verexerc.visible = false;
 				area.showVisualAnswer = false;
+				menuBar.hideAnswer();
+				area.startAnimation();
+				play.visible = false;
 			}
 		}
 		
@@ -297,6 +318,7 @@ package
 			menuBar.btVerResposta.visible = false;
 			menuBar.btVerResposta.verexerc.visible = false;
 			menuBar.btVerResposta.verresp.visible = true;
+			play.visible = false;
 			
 			menuBar.reset();
 			

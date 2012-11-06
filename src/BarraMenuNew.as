@@ -74,6 +74,8 @@ package
 			}
 		}
 		
+		private var selFluxo:int = 1;
+		private var selCorrente:int = 1;
 		private function clickMC(e:MouseEvent):void 
 		{
 			var mc:MovieClip = MovieClip(e.target);
@@ -83,12 +85,72 @@ package
 			
 			if (mc == _fluxoMCmenu) _comboFluxo.selectedIndex = mc.currentFrame - 1;
 			else _comboCorrente.selectedIndex = mc.currentFrame - 1;
+			
+			selFluxo = _fluxoMCmenu.currentFrame;
+			selCorrente = _correnteMCmenu.currentFrame;
+		}
+		
+		private function changeCombo(e:Event):void 
+		{
+			var combo:ComboBox = ComboBox(e.target);
+			if (combo == _comboFluxo) {
+				_fluxoMCmenu.gotoAndStop(combo.selectedItem.value);
+			}else {
+				_correnteMCmenu.gotoAndStop(combo.selectedItem.value);
+			}
 		}
 		
 		private function addListeners():void 
 		{
 			_comboFluxo.addEventListener(Event.CHANGE, changeCombo);
 			_comboCorrente.addEventListener(Event.CHANGE, changeCombo);
+		}
+		
+		public function showAnswer():void
+		{
+			_comboFluxo.selectedIndex = getIndex(fluxoCerto);
+			_comboCorrente.selectedIndex = getIndex(correnteCerta);
+			
+			_fluxoMCmenu.gotoAndStop(_comboFluxo.selectedItem.value);
+			_correnteMCmenu.gotoAndStop(_comboCorrente.selectedItem.value);
+			
+			_correnteResult.visible = false;
+			_fluxoResult.visible = false;
+		}
+		
+		private function getIndex(value:String):int 
+		{
+			switch(value) {
+				case "fluxoIn":
+					return 1;
+					break;
+				case "fluxoOut":
+					return 2;
+					break;
+				case "horario":
+					return 1;
+					break;
+				case "antiHorario":
+					return 2;
+					break;
+				case "none":
+					return 0;
+					break;
+				
+			}
+			return 0;
+		}
+		
+		public function hideAnswer():void
+		{
+			_correnteMCmenu.gotoAndStop(selCorrente);
+			_fluxoMCmenu.gotoAndStop(selFluxo);
+			
+			_comboFluxo.selectedIndex = _fluxoMCmenu.currentFrame - 1;
+			_comboCorrente.selectedIndex = _correnteMCmenu.currentFrame - 1;
+			
+			_correnteResult.visible = true;
+			_fluxoResult.visible = true;
 		}
 		
 		private function praparaCombo():void 
@@ -112,18 +174,11 @@ package
 			addChild(_comboCorrente);
 		}
 		
-		private function changeCombo(e:Event):void 
-		{
-			var combo:ComboBox = ComboBox(e.target);
-			if (combo == _comboFluxo) {
-				_fluxoMCmenu.gotoAndStop(combo.selectedItem.value);
-			}else {
-				_correnteMCmenu.gotoAndStop(combo.selectedItem.value);
-			}
-		}
-		
 		public function reset():void 
 		{
+			selFluxo = 1;
+			selCorrente = 1;
+			
 			_comboFluxo.selectedIndex = 0;
 			_comboCorrente.selectedIndex = 0;
 			
@@ -138,8 +193,8 @@ package
 		
 		public function lock():void 
 		{
-			_comboFluxo.mouseEnabled = false;
-			_comboCorrente.mouseEnabled = false;
+			_comboFluxo.enabled = false;
+			_comboCorrente.enabled = false;
 			
 			_fluxoMCmenu.mouseEnabled = false;
 			_correnteMCmenu.mouseEnabled = false;
@@ -147,8 +202,8 @@ package
 		
 		public function unlock():void 
 		{
-			_comboFluxo.mouseEnabled = true;
-			_comboCorrente.mouseEnabled = true;
+			_comboFluxo.enabled = true;
+			_comboCorrente.enabled = true;
 			
 			_fluxoMCmenu.mouseEnabled = true;
 			_correnteMCmenu.mouseEnabled = true;
@@ -173,12 +228,21 @@ package
 			return _comboCorrente;
 		}
 		
-		public function setAnswer(corrente:Boolean, fluxo:Boolean):void
+		private var fluxoCerto:String;
+		private var correnteCerta:String;
+		
+		//public function setAnswer(corrente:Boolean, fluxo:Boolean):void
+		public function setAnswer(corrente:String, fluxo:String):void
 		{
-			if (corrente) _correnteResult.gotoAndStop("CERTO");
+			fluxoCerto = fluxo;
+			correnteCerta = corrente;
+			
+			//if (corrente) _correnteResult.gotoAndStop("CERTO");
+			if (corrente == _comboCorrente.selectedItem.value) _correnteResult.gotoAndStop("CERTO");
 			else _correnteResult.gotoAndStop("ERRADO");
 			
-			if (fluxo) _fluxoResult.gotoAndStop("CERTO");
+			//if (fluxo) _fluxoResult.gotoAndStop("CERTO");
+			if (fluxo == _comboFluxo.selectedItem.value) _fluxoResult.gotoAndStop("CERTO");
 			else _fluxoResult.gotoAndStop("ERRADO");
 			
 			_correnteResult.visible = true;

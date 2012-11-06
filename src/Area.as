@@ -3,6 +3,7 @@
 	import fl.transitions.easing.None;
 	import fl.transitions.Tween;
 	import fl.transitions.TweenEvent;
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -14,6 +15,7 @@
 	 */
 	public class Area extends Sprite
 	{
+		private var areaAnwer:MovieClip;
 		private var spr_Area:Sprite;
 		//private var spr_Mask:Sprite;
 		private var spr_Mask:Mask2;
@@ -57,6 +59,10 @@
 			var dX:Number = coord.xmax - coord.xmin;
 			var dY:Number = coord.ymax - coord.ymin;
 			areaMax = coord.xmax * dX * dY - (coord.xmin * dX * dY);
+			
+			areaAnwer = new AreaAnswer();
+			addChild(areaAnwer);
+			areaAnwer.visible = false;
 			
 			drawArea();
 			if (evaluationMode) {
@@ -166,6 +172,8 @@
 				this.y = currentExercice.pos.y;
 				resizeTo();
 			}
+			areaAnwer.gotoAndStop(currentExercice.answerRotation);
+			animationRunning = true;
 		}
 		
 		//Funções para movimentação da área nos exercícios.
@@ -214,6 +222,45 @@
 				phiInicial = phiAtual;
 			}
 		}
+		
+		private var animationRunning:Boolean = false;
+		public function stopAnimation():void
+		{
+			spr_Area.visible = false;
+			areaAnwer.visible = true;
+			if (currentExercice.tipo == "move") {
+				if (tweenY.isPlaying) tweenY.stop();
+				if (tweenX.isPlaying) tweenX.stop();
+				tweenY.removeEventListener(TweenEvent.MOTION_CHANGE, showAnswer);
+				tweenY.removeEventListener(TweenEvent.MOTION_FINISH, restartMoveTo);
+			}else {
+				if (tweenSize.isPlaying) tweenSize.stop();
+				tweenSize.removeEventListener(TweenEvent.MOTION_CHANGE, resizePolygon);
+				tweenSize.removeEventListener(TweenEvent.MOTION_FINISH, restartResizeTo);
+			}
+			animationRunning = false;
+		}
+		
+		public function startAnimation():void
+		{
+			if (animationRunning) return;
+			
+			areaAnwer.visible = false;
+			spr_Area.visible = true;
+			
+			if (currentExercice.tipo == "move") {
+				tweenY.addEventListener(TweenEvent.MOTION_CHANGE, showAnswer);
+				tweenY.addEventListener(TweenEvent.MOTION_FINISH, restartMoveTo);
+				tweenY.resume();
+				tweenX.resume();
+			}else {
+				tweenSize.addEventListener(TweenEvent.MOTION_CHANGE, resizePolygon);
+				tweenSize.addEventListener(TweenEvent.MOTION_FINISH, restartResizeTo);
+				tweenSize.resume();
+			}
+			animationRunning = true;
+		}
+		
 		//Fim das funções para movimentação da área nos exercícios.
 		
 		//Funções para alteração de tamanho da área nos exercícios.
@@ -361,6 +408,9 @@
 			
 			spr_Mask.width = spr_Area.width;
 			spr_Mask.height = spr_Area.height;
+			
+			//areaAnwer.scaleX = widthArea/200;
+			//areaAnwer.scaleY = heightArea/150;
 			
 			topDir.y = -heightArea / 2;
 			rightDir.x = widthArea / 2;
