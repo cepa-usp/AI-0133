@@ -21,6 +21,7 @@ package
 	import flash.filters.ColorMatrixFilter;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import graph.Coord;
 	import pipwerks.SCORM;
@@ -70,6 +71,7 @@ package
 		private function init(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
+			scrollRect = new Rectangle(0, 0, 700, 500);
 			
 			ai = new AI(this);
 			ai.container.optionButtons.addAllButtons();
@@ -117,6 +119,12 @@ package
 			
 			ai.debugMode = true;
 			ai.initialize();
+			
+			if (ProgressiveEvaluator(ai.evaluator).currentPlayMode == AIConstants.PLAYMODE_EVALUATE) {
+				lock(menuBar.btAvaliar);
+			}else {
+				onTutorialClick();
+			}
 		}
 		
 		protected function lock(bt:*):void
@@ -232,16 +240,16 @@ package
 			var ttVerResp:ToolTip = new ToolTip(menuBar.btVerResposta, "Mostrar/esconder resposta", 12, 0.8, 250, 0.6, 0.6);
 			var ttValendo:ToolTip = new ToolTip(menuBar.btValendo, "Mudar para o modo de avaliação", 12, 0.8, 250, 0.6, 0.6);
 			
-			var ttFluxo:ToolTip = new ToolTip(menuBar.fluxoMc, "Fluxo induzido", 12, 0.8, 200, 0.6, 0.6);
-			var ttCorrente:ToolTip = new ToolTip(menuBar.correnteMc, "Corrente induzida", 12, 0.8, 200, 0.6, 0.6);
+			//var ttFluxo:ToolTip = new ToolTip(menuBar.fluxoMc, "Fluxo induzido", 12, 0.8, 200, 0.6, 0.6);
+			//var ttCorrente:ToolTip = new ToolTip(menuBar.correnteMc, "Corrente induzida", 12, 0.8, 200, 0.6, 0.6);
 			
 			stage.addChild(ttAvaliar);
 			stage.addChild(ttNovamente);
 			stage.addChild(ttVerResp);
 			stage.addChild(ttValendo);
 			
-			stage.addChild(ttFluxo);
-			stage.addChild(ttCorrente);
+			//stage.addChild(ttFluxo);
+			//stage.addChild(ttCorrente);
 		}
 		
 		private var eval:Boolean = false;
@@ -336,15 +344,15 @@ package
 			if (tutorial == null) {
 				tutorial = new Tutorial();
 				tutorial.adicionarBalao('Veja aqui as orientações.', new Point(642,403), CaixaTextoNova.RIGHT, CaixaTextoNova.CENTER);
-				tutorial.adicionarBalao('Campo magnético perpendicular à tela, conforme representado pelas setas. A intensidade do campo é proporcional à tonalidade de branco das setas.', new Point(536,161), CaixaTextoNova.RIGHT, CaixaTextoNova.FIRST);
-				tutorial.adicionarBalao('O retângulo laranja representa uma espira condutora que se move pelo campo, alterando o fluxo magnético através dela.', new Point(349,263), "", "");
+				tutorial.adicionarBalao('Campo magnético perpendicular à tela, conforme representado pelas setas. A intensidade do campo é diretamente proporcional à tonalidade de branco das setas.', new Point(525,170), CaixaTextoNova.RIGHT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('O retângulo laranja representa uma espira condutora que se move pelo campo, alterando o fluxo magnético através dela (ou não).', new Point(349,263), "", "");
 				tutorial.adicionarBalao('Seu objetivo nesta atividade é indicar corretamente o sentido do fluxo magnético INDUZIDO ("saindo" ou "entrando" na tela)...', new Point(190,54), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
 				tutorial.adicionarBalao('... e da corrente elétrica induzida (horária ou anti-horária).', new Point(190,110), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
 				tutorial.adicionarBalao('Quando tiver terminado, pressione este botão para verificar sua resposta.', new Point(190,147), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
-				tutorial.adicionarBalao('A indicação de certo/errado aparecerá aqui.', new Point(193,35), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('A indicação de certo ou errado aparecerá aqui.', new Point(193,35), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
 				tutorial.adicionarBalao('Depois de avaliar, pressione este botão para ver/ocultar a resposta esperada.', new Point(190,147), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
 				tutorial.adicionarBalao('Pressione este botão para começar um exercício diferente.', new Point(190,174), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
-				tutorial.adicionarBalao('Pressione este botão para que as TODAS as tentativas seguintes valham nota.', new Point(190,203), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Pressione este botão para que TODAS as tentativas seguintes valham nota.', new Point(190,203), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
 				tutorial.adicionarBalao('Veja seu desempenho aqui.', new Point(643,325), CaixaTextoNova.RIGHT, CaixaTextoNova.CENTER);
 			}
 			
@@ -369,7 +377,7 @@ package
 		
 		private function createBoard():void 
 		{
-			board = new Board(17, 22, campoAtual, coord);
+			board = new Board(16, 23, campoAtual, coord);
 			boardLayer.addChild(board);
 		}
 		

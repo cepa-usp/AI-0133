@@ -42,23 +42,26 @@ package
 			var minValor:Number = 0;
 			var maxValor:Number = 10;
 			
+			var off:Number = 14;
+			var offY:Number = 10;
+			
 			for (var i:int = 0; i < n; i++) 
 			{
 				cargas[i] = new Vector.<Carga>();
 				for (var j:int = 0; j < m; j++) 
 				{
 					cargas[i][j] = new Carga();
-					cargas[i][j].y = i * distance;
-					cargas[i][j].x = j * distance;
+					cargas[i][j].y = i * distance + offY;
+					cargas[i][j].x = j * distance + off;
 					
 					if(campo is Campo1){
-						var alpha:Number = Math.abs(campo.zcomp(coord.pixel2x(cargas[i][j].x), 0)) / 10;
+						//var alpha:Number = Math.pow(Math.abs(campo.zcomp(coord.pixel2x(cargas[i][j].x), 0)) / 10, 2);
+						var alpha:Number = 0.0095 * Math.pow(Math.abs(campo.zcomp(coord.pixel2x(cargas[i][j].x), 0)), 2) + 0.05;
 						var zComp:Number = campo.zcomp(coord.pixel2x(cargas[i][j].x), 0);
 					}else {
 						alpha = 1;
 						zComp = 0;
 					}
-					
 					cargas[i][j].setDirection((zComp >= 0 ? false:true));
 					cargas[i][j].setIntensity(alpha);
 					

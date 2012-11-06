@@ -173,7 +173,7 @@ package
 			_comboCorrente.x = -177;
 			_comboCorrente.y = 33;
 			_comboCorrente.width = 125;
-			_comboCorrente.addItem( { label:"Nenhum", value:"none"});
+			_comboCorrente.addItem( { label:"Nenhuma", value:"none"});
 			_comboCorrente.addItem( { label:"Sentido horário", value:"horario"});
 			_comboCorrente.addItem( { label:"Sentido antihorário", value:"antiHorario" } );
 			addChild(_comboCorrente);
