@@ -61,6 +61,11 @@ package
 			_openClose.buttonMode = true;
 		}
 		
+		public function forceOpen():void
+		{
+			if (!menuOpen) openCloseMenu(null);
+		}
+		
 		private function openCloseMenu(e:MouseEvent):void 
 		{
 			if (menuOpen) {

@@ -63,6 +63,8 @@
 			areaAnwer = new AreaAnswer();
 			addChild(areaAnwer);
 			areaAnwer.visible = false;
+			areaAnwer.continuaAnimacao.visible = false;
+			areaAnwer.continuaAnimacao.addEventListener(MouseEvent.CLICK, continueAnimation);
 			
 			drawArea();
 			if (evaluationMode) {
@@ -71,6 +73,12 @@
 			}else{
 				addListeners();
 			}
+		}
+		
+		private function continueAnimation(e:MouseEvent):void 
+		{
+			startAnimation();
+			areaAnwer.continuaAnimacao.visible = false;
 		}
 		
 		private function drawArea():void 
@@ -238,6 +246,7 @@
 				tweenSize.removeEventListener(TweenEvent.MOTION_CHANGE, resizePolygon);
 				tweenSize.removeEventListener(TweenEvent.MOTION_FINISH, restartResizeTo);
 			}
+			areaAnwer.continuaAnimacao.visible = true;
 			animationRunning = false;
 		}
 		

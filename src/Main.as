@@ -49,7 +49,6 @@ package
 		
 		private var ai:AI;
 		private var statsScreen:StatsScreen;
-		private var play:Play;
 		
 		/*
 		 * Filtro de conversão para tons de cinza.
@@ -94,13 +93,6 @@ package
 			sortCampo();
 			createBoard();
 			
-			play = new Play();
-			addChild(play);
-			play.x = 75;
-			play.y = 435;
-			play.visible = false;
-			play.addEventListener(MouseEvent.CLICK, startAnswerAnimation);
-			
 			//var flashVars:Object = LoaderInfo(this.stage.loaderInfo).parameters;
 			//var sec:String = flashVars.mode;
 			
@@ -123,14 +115,8 @@ package
 				//var sec:String = root.loaderInfo.parameters["mode"];
 			//}
 			
-			//ai.debugMode = true;
+			ai.debugMode = true;
 			ai.initialize();
-		}
-		
-		private function startAnswerAnimation(e:MouseEvent):void 
-		{
-			play.visible = false;
-			area.startAnimation();
 		}
 		
 		protected function lock(bt:*):void
@@ -300,14 +286,12 @@ package
 				area.showVisualAnswer = true;
 				menuBar.showAnswer();
 				area.stopAnimation();
-				play.visible = true;
 			}else {
 				menuBar.btVerResposta.verresp.visible = true;
 				menuBar.btVerResposta.verexerc.visible = false;
 				area.showVisualAnswer = false;
 				menuBar.hideAnswer();
 				area.startAnimation();
-				play.visible = false;
 			}
 		}
 		
@@ -318,7 +302,6 @@ package
 			menuBar.btVerResposta.visible = false;
 			menuBar.btVerResposta.verexerc.visible = false;
 			menuBar.btVerResposta.verresp.visible = true;
-			play.visible = false;
 			
 			menuBar.reset();
 			
@@ -347,15 +330,25 @@ package
 		private var tutorial:Tutorial;
 		public function onTutorialClick():void 
 		{
+			//ai.debugTutorial = true;
+			//return;
+			
 			if (tutorial == null) {
 				tutorial = new Tutorial();
-				tutorial.adicionarBalao("Testando.", new Point(30, 100), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
-				tutorial.adicionarBalao("Testando 2.", new Point(60, 200), CaixaTextoNova.LEFT, CaixaTextoNova.CENTER);
-				tutorial.adicionarBalao("Testando 3.", new Point(90, 300), CaixaTextoNova.LEFT, CaixaTextoNova.LAST);
-				tutorial.adicionarBalao("Testando 4.", new Point(100, 400), CaixaTextoNova.RIGHT, CaixaTextoNova.FIRST);
-				tutorial.adicionarBalao("Testando 5.", new Point(120, 500), CaixaTextoNova.RIGHT, CaixaTextoNova.LAST);
+				tutorial.adicionarBalao('Veja aqui as orientações.', new Point(642,403), CaixaTextoNova.RIGHT, CaixaTextoNova.CENTER);
+				tutorial.adicionarBalao('Campo magnético perpendicular à tela, conforme representado pelas setas. A intensidade do campo é proporcional à tonalidade de branco das setas.', new Point(536,161), CaixaTextoNova.RIGHT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('O retângulo laranja representa uma espira condutora que se move pelo campo, alterando o fluxo magnético através dela.', new Point(349,263), "", "");
+				tutorial.adicionarBalao('Seu objetivo nesta atividade é indicar corretamente o sentido do fluxo magnético INDUZIDO ("saindo" ou "entrando" na tela)...', new Point(190,54), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('... e da corrente elétrica induzida (horária ou anti-horária).', new Point(190,110), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Quando tiver terminado, pressione este botão para verificar sua resposta.', new Point(190,147), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('A indicação de certo/errado aparecerá aqui.', new Point(193,35), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Depois de avaliar, pressione este botão para ver/ocultar a resposta esperada.', new Point(190,147), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Pressione este botão para começar um exercício diferente.', new Point(190,174), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Pressione este botão para que as TODAS as tentativas seguintes valham nota.', new Point(190,203), CaixaTextoNova.LEFT, CaixaTextoNova.FIRST);
+				tutorial.adicionarBalao('Veja seu desempenho aqui.', new Point(643,325), CaixaTextoNova.RIGHT, CaixaTextoNova.CENTER);
 			}
 			
+			menuBar.forceOpen();
 			tutorial.iniciar(stage, true);
 		}
 		
