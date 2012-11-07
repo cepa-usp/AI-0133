@@ -46,7 +46,7 @@ package
 		{
 			fluxo = obj.fluxo;
 			corrente = obj.corrente;
-			score = obj.score;
+			this.score = obj.score;
 			_playMode = obj.playMode;
 		}
 		

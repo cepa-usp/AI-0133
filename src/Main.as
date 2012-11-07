@@ -2,12 +2,14 @@ package
 {
 	import cepa.ai.AI;
 	import cepa.ai.AIConstants;
+	import cepa.ai.AIInstance;
 	import cepa.ai.AIObserver;
+	import cepa.ai.IPlayInstance;
 	import cepa.eval.ProgressiveEvaluator;
 	import cepa.eval.StatsScreen;
+	import cepa.tooltip.ToolTip;
 	import cepa.tutorial.CaixaTextoNova;
 	import cepa.tutorial.Tutorial;
-	import cepa.utils.ToolTip;
 	import com.adobe.serialization.json.JSON;
 	import fl.transitions.easing.None;
 	import fl.transitions.Tween;
@@ -29,7 +31,7 @@ package
 	 * ...
 	 * @author Alexandre
 	 */
-	public class Main extends Sprite implements AIObserver
+	public class Main extends Sprite implements AIObserver, AIInstance
 	{
 		//Camadas:
 		private var boardLayer:Sprite;
@@ -70,6 +72,7 @@ package
 		
 		private function init(e:Event = null):void 
 		{
+			trace("222")
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			scrollRect = new Rectangle(0, 0, 700, 500);
 			
@@ -79,6 +82,8 @@ package
 			ai.container.setAboutScreen(new AboutScreen133());
 			ai.container.setInfoScreen(new InstScreen133());
 			ai.addObserver(this);
+			ai.compress = true;
+			ai.debugMode = false;
 			ai.evaluator = new ProgressiveEvaluator(ai);
 			ProgressiveEvaluator(ai.evaluator).finishes = false;
 			ProgressiveEvaluator(ai.evaluator).feedback.x = stage.stageWidth / 2;
@@ -159,6 +164,7 @@ package
 			if(ProgressiveEvaluator(ai.evaluator).currentPlayMode == AIConstants.PLAYMODE_EVALUATE){
 				valendoNota = true;
 				//lock(menuBar.btValendo);
+				reset();
 			}
 		}
 		
@@ -374,6 +380,23 @@ package
 		public function onStatsClick():void 
 		{
 			
+		}
+		
+		/* INTERFACE cepa.ai.AIInstance */
+		
+		public function getData():Object 
+		{
+			return new Object();
+		}
+		
+		public function readData(obj:Object) 
+		{
+			
+		}
+		
+		public function createNewPlayInstance():IPlayInstance 
+		{
+			return new Avaliacao(true, true);
 		}
 		
 		private function createBoard():void 
