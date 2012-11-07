@@ -80,6 +80,7 @@ package
 			ai.container.setInfoScreen(new InstScreen133());
 			ai.addObserver(this);
 			ai.evaluator = new ProgressiveEvaluator(ai);
+			ProgressiveEvaluator(ai.evaluator).finishes = false;
 			ProgressiveEvaluator(ai.evaluator).feedback.x = stage.stageWidth / 2;
 			ProgressiveEvaluator(ai.evaluator).feedback.y = stage.stageHeight / 2;
 			
@@ -121,7 +122,7 @@ package
 			ai.initialize();
 			
 			if (ProgressiveEvaluator(ai.evaluator).currentPlayMode == AIConstants.PLAYMODE_EVALUATE) {
-				lock(menuBar.btAvaliar);
+				lock(menuBar.btValendo);
 			}else {
 				onTutorialClick();
 			}
