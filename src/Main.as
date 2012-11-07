@@ -72,7 +72,6 @@ package
 		
 		private function init(e:Event = null):void 
 		{
-			trace("222")
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			scrollRect = new Rectangle(0, 0, 700, 500);
 			
@@ -80,7 +79,14 @@ package
 			ai.container.optionButtons.addAllButtons();
 			ai.container.messageLabel.visible = false;
 			ai.container.setAboutScreen(new AboutScreen133());
-			ai.container.setInfoScreen(new InstScreen133());
+			var inst:InstScreen133 = new InstScreen133();
+			var rollText:RollText = new RollText();
+			inst.addChild(rollText);
+			rollText.x = -260;
+			rollText.y = -150;
+			var scrollBar:Scrollbar = new Scrollbar(rollText);
+			inst.addChild(scrollBar);
+			ai.container.setInfoScreen(inst);
 			ai.addObserver(this);
 			ai.compress = true;
 			ai.debugMode = false;
